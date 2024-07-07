@@ -1,140 +1,3 @@
-// const express = require("express");
-// const bodyParser = require("body-parser");
-// const app = express();
-// app.set("view engine", "ejs");
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.static("public"));
-
-// // const ejs = require("ejs");
-
-// const mongoose = require("mongoose");
-// mongoose.connect("mongodb://localhost:27017/secrets");
-// const trySchema = new mongoose.Schema({
-//   email: String,
-//   password: String,
-// });
-
-// app.get("/", function (req, res) {
-//   res.render("home");
-// });
-// app.post("/register", function (req, res) {
-//   const newuser = new ClipboardItem({
-//     email: req.body.email,
-//     password: req.body.password,
-//   });
-//   newuser.save(function (err) {
-//     if (err) {
-//       console.log(err);
-//     } else {
-//       res.redirect("secreta");
-//     }
-//   });
-// });
-// app.get("/login", function (req, res) {
-//   res.render("login");
-// });
-// app.get("/register", function (req, res) {
-//   res.render("register");
-// });
-
-// app.listen(6000, function () {
-//   console.log("Server started on port 6000");
-// });
-
-//  -----------------------
-
-// const express = require("express");
-// const bodyParser = require("body-parser");
-// const mongoose = require("mongoose");
-
-// const app = express();
-// app.set("view engine", "ejs");
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.static("public"));
-
-// // Connect to MongoDB
-// mongoose.connect("mongodb://localhost:27017/secrets", {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// });
-// mongoose.connection.on("error", function (error) {
-//   console.error("MongoDB connection error:", error);
-// });
-// mongoose.connection.once("open", function () {
-//   console.log("Connected to MongoDB");
-// });
-
-// // Define Mongoose Schema
-// const trySchema = new mongoose.Schema({
-//   email: String,
-//   password: String,
-// });
-
-// // Define Mongoose Model
-// const User = mongoose.model("User", trySchema);
-
-// // Routes
-// app.get("/", function (req, res) {
-//   res.render("home");
-// });
-
-// app.post("/register", function (req, res) {
-//   const newUser = new User({
-//     email: req.body.username,
-//     password: req.body.password,
-//   });
-
-//   newUser.save(function (err) {
-//     if (err) {
-//       console.log(err);
-//     } else {
-//       res.render("secrets");
-//     }
-//   });
-// });
-
-// app.get("/login", function (req, res) {
-//   res.render("login");
-// });
-// app.get("/register", function (req, res) {
-//   res.render("register");
-// });
-
-// // Start server
-// const PORT = 1000;
-// app.listen(PORT, function () {
-//   console.log(`Server started on port ${PORT}`);
-// });
-
-// const express = require("express");
-// const bodyParser = require("body-parser");
-// const mongoose = require("mongoose");
-
-// const app = express();
-// app.set("view engine", "ejs");
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.static("public"));
-
-// // Connect to MongoDB
-// mongoose.connect("mongodb://localhost:27017/secrets", {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// });
-// mongoose.connection.on("error", function (error) {
-//   console.error("MongoDB connection error:", error);
-// });
-// mongoose.connection.once("open", function () {
-//   console.log("Connected to MongoDB");
-// });
-
-// // Define Mongoose Schema
-// const trySchema = new mongoose.Schema({
-//   email: String,
-//   password: String,
-// });
-
-// // Define Mongoose Model
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -165,6 +28,7 @@ const trySchema = new mongoose.Schema({
 
 const secret = "thisislittlesecret.";
 trySchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
+
 // Define Mongoose Model
 const User = mongoose.model("User", trySchema);
 
@@ -174,14 +38,23 @@ app.get("/", function (req, res) {
 });
 
 app.post("/register", async function (req, res) {
-  const newUser = new User({
-    email: req.body.username,
-    password: req.body.password,
-  });
+  const email = req.body.username;
+  const password = req.body.password;
 
   try {
-    await newUser.save();
-    res.render("secrets");
+    const existingUser = await User.findOne({ email: email });
+    if (existingUser) {
+      res
+        .status(400)
+        .send("Email already registered. Please use a different email.");
+    } else {
+      const newUser = new User({
+        email: email,
+        password: password,
+      });
+      await newUser.save();
+      res.render("secrets");
+    }
   } catch (err) {
     console.log(err);
     res.status(500).send("Internal Server Error");
