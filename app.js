@@ -1,91 +1,225 @@
 // const express = require("express");
 // const bodyParser = require("body-parser");
+// const app = express();
+// app.set("view engine", "ejs");
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.static("public"));
+
+// // const ejs = require("ejs");
+
+// const mongoose = require("mongoose");
+// mongoose.connect("mongodb://localhost:27017/secrets");
+// const trySchema = new mongoose.Schema({
+//   email: String,
+//   password: String,
+// });
+
+// app.get("/", function (req, res) {
+//   res.render("home");
+// });
+// app.post("/register", function (req, res) {
+//   const newuser = new ClipboardItem({
+//     email: req.body.email,
+//     password: req.body.password,
+//   });
+//   newuser.save(function (err) {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       res.redirect("secreta");
+//     }
+//   });
+// });
+// app.get("/login", function (req, res) {
+//   res.render("login");
+// });
+// app.get("/register", function (req, res) {
+//   res.render("register");
+// });
+
+// app.listen(6000, function () {
+//   console.log("Server started on port 6000");
+// });
+
+//  -----------------------
+
+// const express = require("express");
+// const bodyParser = require("body-parser");
 // const mongoose = require("mongoose");
 
 // const app = express();
 // app.set("view engine", "ejs");
-// app.set("views", __dirname + "/views"); // Explicitly set the views directory
 // app.use(express.urlencoded({ extended: true }));
 // app.use(express.static("public"));
 
-// mongoose.connect("mongodb://localhost:27017/todo");
+// // Connect to MongoDB
+// mongoose.connect("mongodb://localhost:27017/secrets", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
+// mongoose.connection.on("error", function (error) {
+//   console.error("MongoDB connection error:", error);
+// });
+// mongoose.connection.once("open", function () {
+//   console.log("Connected to MongoDB");
+// });
 
+// // Define Mongoose Schema
 // const trySchema = new mongoose.Schema({
-//   name: String,
-// });
-// const item = mongoose.model("task", trySchema);
-
-// const todo = new item({
-//   name: "Let's create some videos",
-// });
-// const todo1 = new item({
-//   name: "Let's learn DSA",
-// });
-// const todo2 = new item({
-//   name: "Let's chill",
-// });
-// const todo3 = new item({
-//   name: "Let's code",
+//   email: String,
+//   password: String,
 // });
 
-// // todo.save();
-// // todo1.save();
-// // todo2.save();
-// // todo3.save();
+// // Define Mongoose Model
+// const User = mongoose.model("User", trySchema);
 
-// app.get("/", async (req, res) => {
-//   try {
-//     const foundItems = await item.find({});
-//     res.render("list", { ejes: foundItems });
-//   } catch (err) {
-//     console.log(err);
-//   }
+// // Routes
+// app.get("/", function (req, res) {
+//   res.render("home");
 // });
 
-// app.post("/", async (req, res) => {
-//   const itemName = req.body.ele1;
-//   const todo4 = new item({
-//     name: itemName,
+// app.post("/register", function (req, res) {
+//   const newUser = new User({
+//     email: req.body.username,
+//     password: req.body.password,
 //   });
-//   await todo4.save();
-//   res.redirect("/");
+
+//   newUser.save(function (err) {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       res.render("secrets");
+//     }
+//   });
 // });
 
-// app.post("/delete", async (req, res) => {
-//   const checkedItem = req.body.checkbox1;
-//   try {
-//     await item.findByIdAndRemove(checkedItem);
-//     res.redirect("/");
-//   } catch (err) {
-//     console.log(err);
-//   }
+// app.get("/login", function (req, res) {
+//   res.render("login");
+// });
+// app.get("/register", function (req, res) {
+//   res.render("register");
 // });
 
-// app.listen("3000", function () {
-//   console.log("server started at port 3000");
+// // Start server
+// const PORT = 1000;
+// app.listen(PORT, function () {
+//   console.log(`Server started on port ${PORT}`);
 // });
+
+// const express = require("express");
+// const bodyParser = require("body-parser");
+// const mongoose = require("mongoose");
+
+// const app = express();
+// app.set("view engine", "ejs");
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.static("public"));
+
+// // Connect to MongoDB
+// mongoose.connect("mongodb://localhost:27017/secrets", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
+// mongoose.connection.on("error", function (error) {
+//   console.error("MongoDB connection error:", error);
+// });
+// mongoose.connection.once("open", function () {
+//   console.log("Connected to MongoDB");
+// });
+
+// // Define Mongoose Schema
+// const trySchema = new mongoose.Schema({
+//   email: String,
+//   password: String,
+// });
+
+// // Define Mongoose Model
 
 const express = require("express");
 const bodyParser = require("body-parser");
-const ejs = require("ejs");
+const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption");
 
 const app = express();
-
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+// Connect to MongoDB
+mongoose.connect("mongodb://localhost:27017/secrets", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+mongoose.connection.on("error", function (error) {
+  console.error("MongoDB connection error:", error);
+});
+mongoose.connection.once("open", function () {
+  console.log("Connected to MongoDB");
+});
+
+// Define Mongoose Schema
+const trySchema = new mongoose.Schema({
+  email: String,
+  password: String,
+});
+
+const secret = "thisislittlesecret.";
+trySchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
+// Define Mongoose Model
+const User = mongoose.model("User", trySchema);
+
+// Routes
 app.get("/", function (req, res) {
   res.render("home");
+});
+
+app.post("/register", async function (req, res) {
+  const newUser = new User({
+    email: req.body.username,
+    password: req.body.password,
+  });
+
+  try {
+    await newUser.save();
+    res.render("secrets");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.post("/login", async function (req, res) {
+  const username = req.body.username;
+  const password = req.body.password;
+
+  try {
+    const foundUser = await User.findOne({ email: username });
+
+    if (foundUser) {
+      if (foundUser.password === password) {
+        res.render("secrets");
+      } else {
+        res.status(401).send("Invalid password");
+      }
+    } else {
+      res.status(401).send("User not found");
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 app.get("/login", function (req, res) {
   res.render("login");
 });
+
 app.get("/register", function (req, res) {
   res.render("register");
 });
 
-app.listen(9000, function () {
-  console.log("Server started on port 9000");
+// Start server
+const PORT = 4000;
+app.listen(PORT, function () {
+  console.log(`Server started on port ${PORT}`);
 });
